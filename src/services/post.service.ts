@@ -44,7 +44,7 @@ export const updatePost = (postId: number , userId:number , content: string) => 
     throw new HttpError(404 , 'Post does not exist')
   }
 
-  if(userId != postMemory[postIdx].postId){
+  if(userId != postMemory[postIdx].userId){
     throw new HttpError(401 , 'You dont have access to update post')
   }
 
