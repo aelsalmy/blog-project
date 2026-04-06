@@ -1,14 +1,13 @@
 import type { Request , Response , NextFunction } from "express"
 import * as postService from '../services/post.service'
-import { AnyARecord } from "node:dns"
 
 export const createPost = (req:Request , resp:Response , next:NextFunction) => {
   try{
     const newPost = postService.createPost(req.body.userId , req.body.content)
 
-    resp.status(200).json(newPost)
+    resp.status(201).json(newPost)
   }
-  catch(err:any){
+  catch(err){
     next(err)
   }
 }

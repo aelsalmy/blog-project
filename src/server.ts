@@ -6,7 +6,7 @@ import postRouter from './routers/post.routes'
 import { HttpError } from './errors/http.error'
 
 const app = express()
-const port = 8080
+const port = process.env.PORT ?? 8080
 
 app.use(morgan('dev'))
 app.use(express.json())

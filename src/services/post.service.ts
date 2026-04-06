@@ -26,8 +26,8 @@ export const getAllPosts = () =>{
   return postMemory
 }
 
-export const getPost = (postId: Number) => {
-  const post:Post|undefined = postMemory.find(post => post.postId == postId)
+export const getPost = (postId: number) => {
+  const post:Post|undefined = postMemory.find(post => post.postId === postId)
 
   if(!post){
     throw new HttpError(404 , 'Post does not exist')
@@ -38,7 +38,7 @@ export const getPost = (postId: Number) => {
 
 export const updatePost = (postId: number , userId:number , content: string) => {
 
-  const postIdx:number = postMemory.findIndex(post => post.postId == postId)
+  const postIdx:number = postMemory.findIndex(post => post.postId === postId)
 
   if(postIdx == -1){
     throw new HttpError(404 , 'Post does not exist')
@@ -54,10 +54,10 @@ export const updatePost = (postId: number , userId:number , content: string) => 
 }
 
 export const deletePost = (postId: number) => {
-  const post:Post|undefined = postMemory.find(post => post.postId == postId)
+  const post:Post|undefined = postMemory.find(post => post.postId === postId)
 
   if(!post){
-    throw new HttpError(400 , 'Post does not exist')
+    throw new HttpError(404 , 'Post does not exist')
   }
 
   postMemory = postMemory.filter(post => post.postId != postId)
@@ -66,7 +66,7 @@ export const deletePost = (postId: number) => {
 }
 
 export const publishPost = (postId: number , userId: number) => {
-  const postIdx:number|undefined = postMemory.findIndex(post => post.postId == postId)
+  const postIdx:number|undefined = postMemory.findIndex(post => post.postId === postId)
 
   if(postIdx == -1){
     throw new HttpError(404 , 'Post does not exist')
@@ -87,7 +87,7 @@ export const findUserPosts = (userId: number) => {
     throw new HttpError(400 , 'User does not exist')
   }
 
-  const userPosts = postMemory.filter(post => post.userId == userId)
+  const userPosts = postMemory.filter(post => post.userId === userId)
 
   return userPosts
 }

@@ -8,9 +8,9 @@ export const createUser = (req:Request , resp:Response , next:NextFunction) => {
 
     const newUser = userService.createUser(username , email , password , profile)
 
-    resp.status(200).json({message: "User Created Successfully" , user: newUser})
+    resp.status(201).json({message: "User Created Successfully" , user: newUser})
   }
-  catch(err:any){
+  catch(err){
     next(err)
   }
 }
@@ -21,7 +21,7 @@ export const userLogin = (req:Request , resp:Response , next:NextFunction) => {
 
     resp.status(200).json(user)
   }
-  catch(err:any){
+  catch(err){
     next(err)
   }
 }
