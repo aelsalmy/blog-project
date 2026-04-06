@@ -1,9 +1,9 @@
 import type { Request , Response , NextFunction } from "express"
 import * as postService from '../services/post.service'
 
-export const createPost = (req:Request , resp:Response , next:NextFunction) => {
+export const createPost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const newPost = postService.createPost(req.body.userId , req.body.content)
+    const newPost = await postService.createPost(req.body.userId , req.body.content)
 
     resp.status(201).json(newPost)
   }
@@ -12,9 +12,9 @@ export const createPost = (req:Request , resp:Response , next:NextFunction) => {
   }
 }
 
-export const getAllPosts = (req:Request , resp:Response , next:NextFunction) => {
+export const getAllPosts = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const allPosts = postService.getAllPosts()
+    const allPosts = await postService.getAllPosts()
 
     resp.status(200).json(allPosts)
   }
@@ -23,11 +23,11 @@ export const getAllPosts = (req:Request , resp:Response , next:NextFunction) => 
   }
 }
 
-export const getPost = (req:Request , resp:Response , next:NextFunction) => {
+export const getPost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const postId = Number(req.params.postId)
 
-    const post = postService.getPost(postId)
+    const post = await postService.getPost(postId)
     
     resp.status(200).json(post)
   }
@@ -36,12 +36,12 @@ export const getPost = (req:Request , resp:Response , next:NextFunction) => {
   }
 }
 
-export const updatePost = (req:Request , resp:Response , next:NextFunction) => {
+export const updatePost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const {userId , content} = req.body
     const postId: number = Number(req.params.postId)
 
-    const updatedPost = postService.updatePost(postId , userId , content)
+    const updatedPost = await postService.updatePost(postId , userId , content)
 
     resp.status(200).json(updatedPost)
   }
@@ -50,11 +50,12 @@ export const updatePost = (req:Request , resp:Response , next:NextFunction) => {
   }
 }
 
-export const deletePost = (req:Request , resp:Response , next:NextFunction) => {
+export const deletePost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const postId:number = Number(req.params.postId)
+    const userId:number = req.body.userId
 
-    const deletedPost = postService.deletePost(postId)
+    const deletedPost = await postService.deletePost(postId , userId)
 
     resp.status(200).json(deletedPost)
   }
@@ -63,12 +64,12 @@ export const deletePost = (req:Request , resp:Response , next:NextFunction) => {
   }
 }
 
-export const publishPost = (req:Request , resp:Response , next:NextFunction) => {
+export const publishPost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const postId = Number(req.params.postId)
     const userId = req.body.userId
 
-    const publishedPost = postService.publishPost(postId , userId)
+    const publishedPost = await postService.publishPost(postId , userId)
 
     resp.status(200).json(publishedPost)
   }
@@ -77,11 +78,11 @@ export const publishPost = (req:Request , resp:Response , next:NextFunction) => 
   }
 }
 
-export const getUserPosts = (req:Request , resp:Response , next:NextFunction) => {
+export const getUserPosts = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const userId: number = Number(req.params.userId)
 
-    const userPosts = postService.findUserPosts(userId)
+    const userPosts = await postService.findUserPosts(userId)
 
     resp.status(200).json(userPosts)
   }
