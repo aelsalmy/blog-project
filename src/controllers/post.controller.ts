@@ -1,9 +1,12 @@
 import type { Request , Response , NextFunction } from "express"
+import { AuthRequest } from "../middleware/authenticate.middleware"
 import * as postService from '../services/post.service'
 
 export const createPost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const newPost = await postService.createPost(req.body.userId , req.body.content)
+    const userId: number = (req as AuthRequest).userId
+
+    const newPost = await postService.createPost(userId , req.body.content)
 
     resp.status(201).json(newPost)
   }
@@ -38,7 +41,8 @@ export const getPost = async (req:Request , resp:Response , next:NextFunction) =
 
 export const updatePost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const {userId , content} = req.body
+    const {content} = req.body
+    const userId: number = (req as AuthRequest).userId
     const postId: number = Number(req.params.postId)
 
     const updatedPost = await postService.updatePost(postId , userId , content)
@@ -53,7 +57,7 @@ export const updatePost = async (req:Request , resp:Response , next:NextFunction
 export const deletePost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const postId:number = Number(req.params.postId)
-    const userId:number = req.body.userId
+    const userId: number = (req as AuthRequest).userId
 
     const deletedPost = await postService.deletePost(postId , userId)
 
@@ -67,7 +71,7 @@ export const deletePost = async (req:Request , resp:Response , next:NextFunction
 export const publishPost = async (req:Request , resp:Response , next:NextFunction) => {
   try{
     const postId = Number(req.params.postId)
-    const userId = req.body.userId
+    const userId: number = (req as AuthRequest).userId
 
     const publishedPost = await postService.publishPost(postId , userId)
 
@@ -80,7 +84,7 @@ export const publishPost = async (req:Request , resp:Response , next:NextFunctio
 
 export const getUserPosts = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const userId: number = Number(req.params.userId)
+    const userId: number = (req as AuthRequest).userId
 
     const userPosts = await postService.findUserPosts(userId)
 

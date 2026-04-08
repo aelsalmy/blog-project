@@ -1,6 +1,7 @@
 import type { Request , Response , NextFunction } from "express"
 import * as userService from '../services/user.service'
 import { User, UserProfile } from "@prisma/client"
+import { AuthRequest } from "../middleware/authenticate.middleware"
 
 export const createUser = async (req:Request , resp:Response , next:NextFunction) => {
   try{
@@ -15,20 +16,9 @@ export const createUser = async (req:Request , resp:Response , next:NextFunction
   }
 }
 
-export const userLogin = async (req:Request , resp:Response , next:NextFunction) => {
-  try{
-    const user = await userService.userLogin(req.body.username , req.body.password)
-
-    resp.status(200).json(user)
-  }
-  catch(err){
-    next(err)
-  }
-}
-
 export const getUserProfile = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const userId: number = Number(req.params.userId)
+    const userId: number = (req as AuthRequest).userId
 
     const userProfile: UserProfile = await userService.getUserProfile(userId)
 
@@ -41,7 +31,7 @@ export const getUserProfile = async (req:Request , resp:Response , next:NextFunc
 
 export const updateUserProfile = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const userId: number = Number(req.params.userId)
+    const userId: number = (req as AuthRequest).userId
     const {profession , country , city} = req.body
 
     const updatedUser = await userService.updateUserProfile(userId , profession,  country , city)

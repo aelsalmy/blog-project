@@ -8,6 +8,8 @@ export const createPost = async (userId: number , content: string) => {
     throw new HttpError(400 , 'User Does not Exist')
   }
 
+  console.log(userId)
+
   const newPost = await prisma.post.create({
     data: {
       userId: userId,

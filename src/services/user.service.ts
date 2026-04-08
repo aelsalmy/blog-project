@@ -46,25 +46,6 @@ export async function createUser(username: string , email: string , password: st
   return stripPassword(newUser)
 }
 
-export async function userLogin(username: string , password: string){
-
-  const user = await prisma.user.findFirst({
-    where: {username: username}
-  })
-
-  if(!user){
-    throw new HttpError(400 , 'Invalid Credentials 1')
-  }
-
-  const matchedPassword = await bcrypt.compare(password , user.password)
-
-  if(!matchedPassword){
-    throw new HttpError(400 , 'Invalid Credentials')
-  }
-
-  return stripPassword(user)
-}
-
 export async function checkIfUserExists(userId:number){
   const user = await prisma.user.findFirst({
     where: {id: userId}
