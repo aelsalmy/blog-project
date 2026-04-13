@@ -1,33 +1,44 @@
 import { HttpError } from "../errors/http.error"
-import { Post } from "../models/post.model"
+import prisma from "../utils/prisma.client"
 import { checkIfUserExists } from "./user.service"
 
-let postMemory: Post[] = []
+export const createPost = async (userId: number , content: string) => {
 
-export const createPost = (userId: number , content: string) => {
-
-  if(!checkIfUserExists(userId)){
+  if(!await checkIfUserExists(userId)){
     throw new HttpError(400 , 'User Does not Exist')
   }
 
-  const newPost:Post = {
-    userId: userId,
-    content: content,
-    postId: postMemory.length == 0? 0: postMemory[postMemory.length -1].postId + 1,
-    published: false
-  }
-
-  postMemory.push(newPost)
+  const newPost = await prisma.post.create({
+    data: {
+      userId: userId,
+      content: content
+    }
+  })
 
   return newPost
 }
 
-export const getAllPosts = () =>{
-  return postMemory
+export const getAllPosts = async (page:number , pageSize: number) =>{
+  const posts = await prisma.post.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    orderBy: {id: 'asc'}
+  })
+
+  const total = await prisma.user.count()
+ 
+  return {
+    posts,
+    total,
+    page,
+    totalPages: Math.ceil(total / pageSize)
+  }
 }
 
-export const getPost = (postId: number) => {
-  const post:Post|undefined = postMemory.find(post => post.postId === postId)
+export const getPost = async (postId: number) => {
+  const post = await prisma.post.findFirst({
+    where: {id: postId},
+  })
 
   if(!post){
     throw new HttpError(404 , 'Post does not exist')
@@ -36,58 +47,85 @@ export const getPost = (postId: number) => {
   return post
 }
 
-export const updatePost = (postId: number , userId:number , content: string) => {
+export const updatePost = async (postId: number , userId:number , content: string) => {
 
-  const postIdx:number = postMemory.findIndex(post => post.postId === postId)
+  const post = await prisma.post.findFirst({
+    where: {id: postId}
+  })
 
-  if(postIdx == -1){
+  if(!post){
     throw new HttpError(404 , 'Post does not exist')
   }
 
-  if(userId != postMemory[postIdx].userId){
+  if(userId != post.userId){
     throw new HttpError(401 , 'You dont have access to update post')
   }
 
-  postMemory[postIdx].content = content
+  const updatedPost = await prisma.post.update({
+    where: {id: postId},
+    data: {
+      content: content
+    }
+  })
 
-  return postMemory[postIdx]
+  return updatedPost
 }
 
-export const deletePost = (postId: number) => {
-  const post:Post|undefined = postMemory.find(post => post.postId === postId)
+export const deletePost = async (postId: number , userId: number) => {
+  const post = await prisma.post.findFirst({
+    where: {id: postId}
+  })
 
   if(!post){
     throw new HttpError(404 , 'Post does not exist')
   }
 
-  postMemory = postMemory.filter(post => post.postId != postId)
+  if(userId !== post.userId){
+    throw new HttpError(401 , 'You dont have access to delete post')
+  }
 
-  return post
+
+  const deletedPost = await prisma.post.delete({
+    where:{id: postId}
+  })
+
+  return deletedPost
 }
 
-export const publishPost = (postId: number , userId: number) => {
-  const postIdx:number|undefined = postMemory.findIndex(post => post.postId === postId)
+export const publishPost = async (postId: number , userId: number) => {
 
-  if(postIdx == -1){
+  const post = await prisma.post.findFirst({
+    where: {id: postId}
+  })
+
+  if(!post){
     throw new HttpError(404 , 'Post does not exist')
   }
 
-  if(userId !== postMemory[postIdx].userId){
+  if(userId !== post.userId){
     throw new HttpError(401 , 'You dont have access to publish post')
   }
-
-  postMemory[postIdx].published = true
   
-  return postMemory[postIdx]
+
+  const updatedPost = await prisma.post.update({
+    where: {id: postId},
+    data: {
+      published: true
+    }
+  })
+  
+  return updatedPost
 }
 
-export const findUserPosts = (userId: number) => {
+export const findUserPosts = async (userId: number) => {
 
-  if(!checkIfUserExists(userId)){
+  if(!await checkIfUserExists(userId)){
     throw new HttpError(400 , 'User does not exist')
   }
 
-  const userPosts = postMemory.filter(post => post.userId === userId)
+  const userPosts = await prisma.post.findMany({
+    where: {userId: userId}
+  })
 
   return userPosts
 }
