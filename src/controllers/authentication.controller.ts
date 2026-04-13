@@ -43,7 +43,7 @@ export const signout = async (req:Request , resp:Response , next:NextFunction) =
   try{
     const {tokenId , token} = req.cookies.refreshToken
 
-    authService.revokeRefreshToken(tokenId)
+    await authService.revokeRefreshToken(tokenId)
 
     resp.clearCookie("refreshToken", {
       httpOnly: true,

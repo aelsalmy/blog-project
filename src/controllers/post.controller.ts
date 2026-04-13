@@ -17,7 +17,9 @@ export const createPost = async (req:Request , resp:Response , next:NextFunction
 
 export const getAllPosts = async (req:Request , resp:Response , next:NextFunction) => {
   try{
-    const allPosts = await postService.getAllPosts()
+    const {page , pageSize} = req.query
+
+    const allPosts = await postService.getAllPosts(Number(page) , Number(pageSize))
 
     resp.status(200).json(allPosts)
   }

@@ -13,7 +13,7 @@ export async function userLogin(username: string , password: string){
   })
 
   if(!user){
-    throw new HttpError(400 , 'Invalid Credentials 1')
+    throw new HttpError(400 , 'Invalid Credentials')
   }
 
   const matchedPassword = await bcrypt.compare(password , user.password)
@@ -44,7 +44,7 @@ export async function renewRefreshToken(tokenId:number , refreshToken: string){
 export async function renewAccessToken(tokenId:number , refreshToken: string){
   const token: RefreshToken = await getRefreshToken(tokenId , refreshToken)
 
-  const newAccessToken = await createAccessToken(token.userId)
+  const newAccessToken = createAccessToken(token.userId)
 
   return newAccessToken
 }
@@ -57,6 +57,10 @@ export async function revokeRefreshToken(tokenId: number) {
       isRevoked: true
     }
   })
+
+  if(!token){
+    throw new HttpError(400 , 'Refresh Token Not Valid')
+  }
 
   return token
 }
@@ -79,13 +83,13 @@ async function validateRefreshToken(tokenId: number) {
   })
 
   if(!token){
-    return false
+    return {valid: false}
   } else {
-    return true
+    return {valid: true , token: token}
   }
 }
 
-async function createAccessToken(userId: number) {
+function createAccessToken(userId: number) {
   const signedAccessToken = jwt.sign({userId: userId} , process.env.JWT_SECRET! , {
     expiresIn: '15m'
   })
@@ -94,31 +98,19 @@ async function createAccessToken(userId: number) {
 }
 
 async function getRefreshToken(tokenId:number , refreshToken: string){
-  const token = await prisma.refreshToken.findFirst({
-    where: {
-      AND: [
-        {id: tokenId},
-        {isRevoked: false},
-        {expiresAt: {
-          gt: new Date()
-        }}
-    ]},
-  })
+  const refreshTokenValid = await validateRefreshToken(tokenId)
 
-  if(!token){
-    throw new HttpError(401 , 'Refresh Token not Valid notFound')
+  if(!refreshTokenValid.valid){
+    throw new HttpError(401 , 'Refresh Token not Valid')
   }
 
-  console.log("refreshToken:", refreshToken);
-  console.log("tokenHash:", token?.tokenHash);  
-
-  const hashMatching = await bcrypt.compare(refreshToken , token.tokenHash)
+  const hashMatching = await bcrypt.compare(refreshToken , refreshTokenValid.token!.tokenHash)
 
   if(!hashMatching){
     throw new HttpError(401 , 'Refresh Token not Valid')
   }
 
-  return token
+  return refreshTokenValid.token!
 }
 
 async function createRefreshToken(userId: number){

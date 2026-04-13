@@ -3,8 +3,6 @@ import bcrypt from 'bcrypt';
 import prisma from "../utils/prisma.client"
 import { User, UserProfile } from "@prisma/client";
 
-const saltRounds = 12
-
 export async function createUser(username: string , email: string , password: string , profile: UserProfile){
 
   const dupUsers = await prisma.user.findFirst({
@@ -24,7 +22,7 @@ export async function createUser(username: string , email: string , password: st
     throw new HttpError(400 , 'Username Already Taken') 
   }
 
-  const hashedPassword = await bcrypt.hash(password , saltRounds)
+  const hashedPassword = await bcrypt.hash(password , process.env.SALT_ROUNDS!)
 
   const newUser = await prisma.user.create({
     data: {

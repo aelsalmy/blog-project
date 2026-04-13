@@ -7,7 +7,7 @@ import { authenticateUser } from '../middleware/authenticate.middleware'
 const userRouter = express.Router()
 
 userRouter.post('/' , validate(createUserSchema) , userController.createUser)
-userRouter.put('/' , validate(userProfileSchema) , userController.updateUserProfile)
+userRouter.put('/' , authenticateUser , validate(userProfileSchema) , userController.updateUserProfile)
 userRouter.get('/' , authenticateUser , userController.getUserProfile)
 
 

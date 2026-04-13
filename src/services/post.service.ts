@@ -4,11 +4,9 @@ import { checkIfUserExists } from "./user.service"
 
 export const createPost = async (userId: number , content: string) => {
 
-  if(!checkIfUserExists(userId)){
+  if(!await checkIfUserExists(userId)){
     throw new HttpError(400 , 'User Does not Exist')
   }
-
-  console.log(userId)
 
   const newPost = await prisma.post.create({
     data: {
@@ -20,10 +18,21 @@ export const createPost = async (userId: number , content: string) => {
   return newPost
 }
 
-export const getAllPosts = async () =>{
-  const allPosts = await prisma.post.findMany()
+export const getAllPosts = async (page:number , pageSize: number) =>{
+  const posts = await prisma.post.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    orderBy: {id: 'asc'}
+  })
 
-  return allPosts
+  const total = await prisma.user.count()
+ 
+  return {
+    posts,
+    total,
+    page,
+    totalPages: Math.ceil(total / pageSize)
+  }
 }
 
 export const getPost = async (postId: number) => {
@@ -110,7 +119,7 @@ export const publishPost = async (postId: number , userId: number) => {
 
 export const findUserPosts = async (userId: number) => {
 
-  if(!checkIfUserExists(userId)){
+  if(!await checkIfUserExists(userId)){
     throw new HttpError(400 , 'User does not exist')
   }
 

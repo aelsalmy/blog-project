@@ -30,7 +30,7 @@ app.use((err:Error , req:Request , resp:Response , next: NextFunction) => {
     resp.status(err.statusCode).json({message: err.message})
   }
   else{
-    resp.status(500).json(err.stack)
+    resp.status(500).json('Internal Server Error')
   }
 })
 
